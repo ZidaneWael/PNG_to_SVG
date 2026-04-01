@@ -5,16 +5,22 @@ const convertBtn = document.getElementById('convert');
 const downloadLink = document.getElementById('download');
 const result = document.getElementById('result');
 const canvas = document.getElementById('canvas');
+const status = document.getElementById('status');
 
 let wasmReady = false;
 let lastSvgUrl = null;
 
 async function setupWasm() {
   try {
+    status.textContent = 'Loading vtracer engine...';
     await init();
     wasmReady = true;
+    status.textContent = 'Engine ready.';
+    // enable file input now that WASM is initialized
+    fileInput.disabled = false;
   } catch (e) {
     console.error('Failed to init vtracer-wasm', e);
+    status.textContent = 'Engine failed to load.';
     result.textContent = 'Failed to initialize vtracer engine.';
   }
 }
@@ -47,6 +53,12 @@ fileInput.addEventListener('change', async (e) => {
     convertBtn.disabled = true;
     return;
   }
+  if (!wasmReady) {
+    // defensive: shouldn't happen since input is disabled until ready
+    status.textContent = 'Engine not ready yet. Please wait.';
+    convertBtn.disabled = true;
+    return;
+  }
   const file = e.target.files[0];
   await loadImageToCanvas(file);
   convertBtn.disabled = false;
@@ -59,6 +71,7 @@ convertBtn.addEventListener('click', async () => {
   }
   convertBtn.disabled = true;
   result.textContent = 'Converting...';
+  status.textContent = 'Converting image...';
 
   try {
     const ctx = canvas.getContext('2d');
@@ -79,9 +92,11 @@ convertBtn.addEventListener('click', async () => {
     downloadLink.href = lastSvgUrl;
     downloadLink.download = 'image.svg';
     downloadLink.style.display = 'inline-block';
+    status.textContent = 'Conversion complete.';
   } catch (err) {
     console.error(err);
     result.textContent = 'Conversion failed. See console for details.';
+    status.textContent = 'Conversion failed.';
   } finally {
     convertBtn.disabled = false;
   }
