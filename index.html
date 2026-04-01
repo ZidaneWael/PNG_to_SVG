@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PNG/JPG → SVG (vtracer)</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>PNG/JPG → SVG (vtracer)</h1>
+      <p>Select a PNG or JPG, then click Convert to SVG.</p>
+
+      <div class="controls">
+        <input id="file" type="file" accept="image/png,image/jpeg" />
+        <button id="convert" disabled>Convert to SVG</button>
+        <a id="download" style="display:none" class="btn">Download SVG</a>
+      </div>
+
+      <div class="preview">
+        <canvas id="canvas" style="display:none"></canvas>
+        <div id="result"></div>
+      </div>
+
+      <footer>
+        <small>Client-side conversion using vtracer-wasm.</small>
+      </footer>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
