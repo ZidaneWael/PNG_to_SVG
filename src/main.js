@@ -1,4 +1,5 @@
-import init, { to_svg } from 'vtracer-wasm';
+import init, { to_svg } from 'vtracer-wasm/vtracer.js';
+import wasmUrl from 'vtracer-wasm/vtracer.wasm?url';
 
 const fileInput = document.getElementById('file');
 const convertBtn = document.getElementById('convert');
@@ -13,7 +14,7 @@ let lastSvgUrl = null;
 async function setupWasm() {
   try {
     status.textContent = 'Loading vtracer engine...';
-    await init();
+    await init(wasmUrl);
     wasmReady = true;
     status.textContent = 'Engine ready.';
     // enable file input now that WASM is initialized
