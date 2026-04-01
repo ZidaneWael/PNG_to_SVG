@@ -10,6 +10,19 @@ const status = document.getElementById('status');
 
 let wasmReady = false;
 let lastSvgUrl = null;
+const defaultVtracerConfig = {
+  binary: false,
+  mode: 'spline',
+  hierarchical: 'stacked',
+  cornerThreshold: 60,
+  lengthThreshold: 4,
+  maxIterations: 10,
+  spliceThreshold: 45,
+  filterSpeckle: 4,
+  colorPrecision: 6,
+  layerDifference: 16,
+  pathPrecision: 2
+};
 
 async function setupWasm() {
   try {
@@ -82,8 +95,7 @@ convertBtn.addEventListener('click', async () => {
     // to_svg expects a Uint8Array of pixels (RGBA)
     const pixels = new Uint8Array(imageData.data.buffer);
 
-    // config object can be adjusted (thresholds, colors, etc.)
-    const svg = to_svg(pixels, w, h, {});
+    const svg = to_svg(pixels, w, h, defaultVtracerConfig);
 
     if (lastSvgUrl) URL.revokeObjectURL(lastSvgUrl);
     const blob = new Blob([svg], { type: 'image/svg+xml' });
