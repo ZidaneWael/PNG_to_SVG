@@ -8,7 +8,7 @@
     "preview": "vite preview --port 5000"
   },
   "dependencies": {
-    "vtracer-wasm": "^0.1.0"
+    "imagetracerjs": "^1.2.6"
   },
   "devDependencies": {
     "vite": "^5.0.0"

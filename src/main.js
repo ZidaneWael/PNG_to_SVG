@@ -1,5 +1,4 @@
-import init, { to_svg } from 'vtracer-wasm/vtracer.js';
-import wasmUrl from 'vtracer-wasm/vtracer.wasm?url';
+import ImageTracer from 'imagetracerjs';
 
 const fileInput = document.getElementById('file');
 const convertBtn = document.getElementById('convert');
@@ -8,36 +7,24 @@ const result = document.getElementById('result');
 const canvas = document.getElementById('canvas');
 const status = document.getElementById('status');
 
-let wasmReady = false;
+let engineReady = true;
 let lastSvgUrl = null;
-const defaultVtracerConfig = {
-  binary: false,
-  mode: 'spline',
-  hierarchical: 'stacked',
-  cornerThreshold: 60,
-  lengthThreshold: 4,
-  maxIterations: 10,
-  spliceThreshold: 45,
-  filterSpeckle: 4,
-  colorPrecision: 6,
-  layerDifference: 16,
-  pathPrecision: 2
+const traceOptions = {
+  pathomit: 8,
+  ltres: 1,
+  qtres: 1,
+  numberofcolors: 16,
+  colorquantcycles: 3,
+  colorsampling: 2,
+  layering: 0,
+  roundcoords: 1,
+  scale: 1,
+  strokewidth: 1,
+  viewbox: true,
+  desc: false,
+  blurradius: 0,
+  blurdelta: 20
 };
-
-async function setupWasm() {
-  try {
-    status.textContent = 'Loading vtracer engine...';
-    await init(wasmUrl);
-    wasmReady = true;
-    status.textContent = 'Engine ready.';
-    // enable file input now that WASM is initialized
-    fileInput.disabled = false;
-  } catch (e) {
-    console.error('Failed to init vtracer-wasm', e);
-    status.textContent = 'Engine failed to load.';
-    result.textContent = 'Failed to initialize vtracer engine.';
-  }
-}
 
 function loadImageToCanvas(file) {
   return new Promise((resolve, reject) => {
@@ -67,8 +54,7 @@ fileInput.addEventListener('change', async (e) => {
     convertBtn.disabled = true;
     return;
   }
-  if (!wasmReady) {
-    // defensive: shouldn't happen since input is disabled until ready
+  if (!engineReady) {
     status.textContent = 'Engine not ready yet. Please wait.';
     convertBtn.disabled = true;
     return;
@@ -79,7 +65,7 @@ fileInput.addEventListener('change', async (e) => {
 });
 
 convertBtn.addEventListener('click', async () => {
-  if (!wasmReady) {
+  if (!engineReady) {
     result.textContent = 'Engine not ready yet. Try again in a moment.';
     return;
   }
@@ -89,13 +75,8 @@ convertBtn.addEventListener('click', async () => {
 
   try {
     const ctx = canvas.getContext('2d');
-    const w = canvas.width;
-    const h = canvas.height;
-    const imageData = ctx.getImageData(0, 0, w, h);
-    // to_svg expects a Uint8Array of pixels (RGBA)
-    const pixels = new Uint8Array(imageData.data.buffer);
-
-    const svg = to_svg(pixels, w, h, defaultVtracerConfig);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const svg = ImageTracer.imagedataToSVG(imageData, traceOptions);
 
     if (lastSvgUrl) URL.revokeObjectURL(lastSvgUrl);
     const blob = new Blob([svg], { type: 'image/svg+xml' });
@@ -115,4 +96,5 @@ convertBtn.addEventListener('click', async () => {
   }
 });
 
-setupWasm();
+status.textContent = 'Engine ready.';
+fileInput.disabled = false;
